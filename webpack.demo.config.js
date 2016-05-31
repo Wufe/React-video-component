@@ -1,15 +1,13 @@
 var Webpack = require( 'webpack' );
 var Path = require( 'path' );
+var CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 
 module.exports = {
     devtool: "inline-sourcemap",
-    entry: {
-        video: Path.join( __dirname, "src", "video.js" )
-    },
+    entry: Path.join( __dirname, "demo", "app", "index.js" ),
     output: {
-        path: Path.join( __dirname, "build", "components" ),
-        filename: "[name].js",
-        libraryTarget: 'umd'
+        path: Path.join( __dirname, "demo", "assets", "js" ),
+        filename: "bundle.js"
     },
     module: {
         loaders: [
@@ -27,5 +25,8 @@ module.exports = {
                 loader: 'style!css!'
             }
         ]
-    }
+    },
+    plugins: [
+        
+    ]
 };

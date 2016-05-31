@@ -3,11 +3,13 @@ var Path = require( 'path' );
 var CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 
 module.exports = {
-    devtool: "inline-sourcemap",
-    entry: Path.join( __dirname, "src", "Video.js" ),
+    entry: {
+        video: Path.join( __dirname, "src", "video.js" )
+    },
     output: {
         path: Path.join( __dirname, "dist", "components" ),
-        filename: "Video.js"
+        filename: "[name].js",
+        libraryTarget: 'umd'
     },
     module: {
         loaders: [

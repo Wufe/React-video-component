@@ -1,1 +1,1 @@
-module.exports = require( './components/Video.js' );
+module.exports = require( './components/video.js' );

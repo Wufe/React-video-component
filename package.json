@@ -2,11 +2,12 @@
   "name": "react-video-component",
   "version": "1.0.0",
   "description": "Simple video component for react",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "webpack",
     "build-watch": "webpack -wd",
-    "build-dist": "webpack --config webpack.dist.config.js"
+    "build-dist": "webpack --config webpack.dist.config.js",
+    "build-demo": "concurrently \"npm run build-watch\" \"webpack --config webpack.demo.config.js -wd\""
   },
   "babel": {
     "presets": [
