@@ -10,7 +10,8 @@ class App extends React.Component{
         container: {
             width: "100vw",
             height: "100vh",
-            lineHeight: "100vh"
+            lineHeight: "100vh",
+            textAlign: "center"
         }
     }
 
@@ -22,12 +23,36 @@ class App extends React.Component{
         document.location.hash = parseInt(event.target.currentTime);
     }
 
+    onMetaDataLoaded = event => {
+        console.log( event );
+        setTimeout(() => {
+            event.target.play();
+        }, 5000);
+        window.video = event.target;
+    }
+
     render(){
         return (
             <div style={[
                 this.styles.container
             ]}>
                 <Video
+                    style={{
+                        video: {
+
+                        },
+                        videoWrapper: {
+
+                        },
+                        controlsWrapper: {
+
+                        }
+                    }}
+                    attributes={{
+                        loop: true,
+                        controls: true
+                    }}
+                    loadedmetadata={this.onMetaDataLoaded}
                     timeupdate={this.onTimeUpdate}
                     sources={[
                         {

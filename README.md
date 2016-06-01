@@ -26,4 +26,6 @@ A list of events can be found [here]("http://www.w3schools.com/tags/ref_av_dom.a
 The `sources` prop must be an array of objects or strings, representing the url of the video.
 If object is given, it must have `src` key representing the url.
 
-Styles can also be injected defining the `style` prop.
+Styles can also be injected defining the `style` prop.  
+
+Standard video props can be injected into the component using the "attributes" prop, that requires an object defining them.

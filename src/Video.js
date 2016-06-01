@@ -1,16 +1,11 @@
 import React from 'react';
-import Radium from 'radium';
+import VideoStyle from './style/video.scss';
 
 class Video extends React.Component{
 
     styles = {
-        base: {
-            maxWidth: "100%",
-            maxHeight: "100%",
-            margin: "0 auto",
-            verticalAlign: "middle",
-            display: "inline-block"
-        }
+
+
     }
 
     events = [
@@ -56,18 +51,108 @@ class Video extends React.Component{
     };
 
     onMetaDataLoaded = e => {
-        //console.log( "Meta data loaded", e );
+        this._controlsWrapper.style.opacity = "1";
+    }
+
+    onTimeUpdate = e => {
+        let current = e.target.currentTime;
+        let end = e.target.seekable.end(0);
+        let percentage = parseInt(current/end*100*100)/100; // in order to approximate to 2 digits
+        this.setState({
+            progress: percentage
+        }, () => {
+            this.seekProgressBarAppearance(this._progress, percentage);
+        });
+
+    }
+
+    onInput = e => {
+        this.seekProgressBarAppearance(e.target, e.target.value);
+    }
+
+    seekProgressBarAppearance = (target, value, pattern) => {
+        if( pattern === undefined ){
+            pattern = { name: "progress", colors: [ "#A90329", "#6D0019", "rgba( 0, 0, 0, 0.4 )" ]};
+        }
+        if( this.props.style[pattern.name] === undefined )
+            this.props.style[pattern.name] = {};
+        let color = {
+            start: this.props.style[pattern.name].startColor ||
+                    this.props.style[pattern.name].backgroundColor ||
+                    this.props.style[pattern.name].background ||
+                    pattern.colors[0],
+            stop: this.props.style[pattern.name].stopColor ||
+                    this.props.style[pattern.name].backgroundColor ||
+                    this.props.style[pattern.name].background ||
+                    pattern.colors[1],
+            back: this.props.style[pattern.name].back ||
+                    pattern.colors[2]
+        };
+        let background = `linear-gradient(to right, ${color.start} 0%, ${color.stop} ${value}%, ${color.back} ${value}%, ${color.back} )`;
+        target.style.backgroundImage = background;
+    }
+
+    onProgressChange = e => {
+        let progress = e.target.value;
+        this.setState({
+            progress
+        }, () => {
+            if( !this._video )
+                return;
+            if( this._video.seekable.length < 1 )
+                return;
+            let end = this._video.seekable.end(0);
+            let time = progress*end/100;
+            this._video.currentTime = time;
+        })
+    }
+
+    checkBuffer = () => {
+        if( !this._video )
+            return;
+        if( !this.lastSought ){
+            this.lastBuffered = 0;
+        }
+        if( this._video.buffered.length < 1 )
+            return;
+        let buffered = this._video.buffered.end(this._video.buffered.length-1);
+        if( this.lastBuffered != buffered ){
+            if( this._video.seekable.length < 1 )
+                return;
+            this.lastBuffered = buffered;
+            let end = this._video.seekable.end(0);
+            let percentage = parseInt( buffered / end * 100 );
+            this.seekProgressBarAppearance(this._buffer, percentage,{
+                name: "buffer",
+                colors: [
+                    "#666",
+                    "#666",
+                    "#000"
+                ]
+            });
+        }
     }
 
     referenceVideoTag = video => {
+        this._video = video;
         this.setState({ video }, () => {
             video.addEventListener( "loadedmetadata", this.onMetaDataLoaded );
+            video.addEventListener( "timeupdate", this.onTimeUpdate );
+            this.bufferCheckTimer = setInterval( this.checkBuffer, 500 );
             this.createListeners(video);
         });
     }
 
     constructor(){
         super();
+        this._controlsWrapper = {};
+        this._buffer = {};
+        this._progress = {};
+        this.state = {
+            buffer: 0,
+            progress: 0
+        };
+        this.bufferCheckTimer = {};
     }
 
     componentWillUnmount(){
@@ -78,7 +163,18 @@ class Video extends React.Component{
             }
             this.eventListeners = [];
             video.removeEventListener( "loadedmetadata", this.onMetaDataLoaded );
+            video.removeEventListener( "timeupdate", this.onTimeUpdate );
         }
+        clearInterval( this.bufferCheckTimer );
+    }
+
+    getStyle = () => {
+        let style = {
+            video: this.props.style.video || this.props.style,
+            videoWrapper: this.props.style.videoWrapper || {},
+            controlsWrapper: this.props.style.controlsWrapper || {}
+        }
+        return style;
     }
 
     render(){
@@ -92,19 +188,38 @@ class Video extends React.Component{
                 return source;
             }
         })
-        let style = Object.assign({}, this.styles.base, this.props.style);
+        let style = this.getStyle();
         return (
-            <video
-                ref={this.referenceVideoTag}
-                style={style}
-                width={this.props.width || "auto" }
-                height={this.props.height || "auto" }
-                controls
+            <div className="reactVideoWrapper">
+                <video
+                    className={`${this.props.className}`}
+                    ref={this.referenceVideoTag}
+                    style={style.video}
+                    width={this.props.width || "auto" }
+                    height={this.props.height || "auto" }
+                    {...this.props.attributes}
+                    >
+                        {
+                            sources.map( (s, i) => <source key={i} src={s.src} type={s.type || null} />)
+                        }
+                </video>
+                <div
+                    ref={ ref => this._controlsWrapper = ref }
+                    style={style.controlsWrapper}
+                    className="controlsWrapper"
                 >
-                    {
-                        sources.map( (s, i) => <source key={i} src={s.src} type={s.type || null} />)
-                    }
-            </video>
+                    <div className="seekBar">
+                        <input ref={ ref => this._buffer = ref } type="range" step="0.1" min="0" max="100" value={this.state.buffer} readonly="readonly" className="buffer"/>
+                        <input ref={ ref => this._progress = ref } type="range" step="0.1" min="0" max="100" value={this.state.progress} onChange={this.onProgressChange} onInput={this.onInput} className="progress"/>
+                    </div>
+                    <div className="volumeBar"></div>
+                    <div className="playButton"></div>
+                    <div className="pauseButton"></div>
+                    <div className="fullscreenButton"></div>
+
+                </div>
+            </div>
+
         );
     }
 };
@@ -119,12 +234,16 @@ Video.propTypes = {
     height: React.PropTypes.oneOfType([
         React.PropTypes.string,
         React.PropTypes.number
-    ])
+    ]),
+    className: React.PropTypes.string,
+    attributes: React.PropTypes.object
 };
 
 Video.defaultProps = {
     sources: [],
-    style: {}
+    style: {},
+    className: "",
+    attributes: []
 };
 
 export default Video;
