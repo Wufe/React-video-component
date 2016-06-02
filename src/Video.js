@@ -1,12 +1,8 @@
 import React from 'react';
 import VideoStyle from './style/video.scss';
+import Progress from './Progress';
 
 class Video extends React.Component{
-
-    styles = {
-
-
-    }
 
     events = [
         "abort",
@@ -51,7 +47,11 @@ class Video extends React.Component{
     };
 
     onMetaDataLoaded = e => {
-        this._controlsWrapper.style.opacity = "1";
+        // TODO: Uncomment this line after debug
+        // if( this.props.attributes.controls )
+        //     this._controlsWrapper.style.display = "none";
+        if( this.props.controls )
+            this._controlsWrapper.style.opacity = "1";
     }
 
     onTimeUpdate = e => {
@@ -60,40 +60,11 @@ class Video extends React.Component{
         let percentage = parseInt(current/end*100*100)/100; // in order to approximate to 2 digits
         this.setState({
             progress: percentage
-        }, () => {
-            this.seekProgressBarAppearance(this._progress, percentage);
         });
-
-    }
-
-    onInput = e => {
-        this.seekProgressBarAppearance(e.target, e.target.value);
-    }
-
-    seekProgressBarAppearance = (target, value, pattern) => {
-        if( pattern === undefined ){
-            pattern = { name: "progress", colors: [ "#A90329", "#6D0019", "rgba( 0, 0, 0, 0.4 )" ]};
-        }
-        if( this.props.style[pattern.name] === undefined )
-            this.props.style[pattern.name] = {};
-        let color = {
-            start: this.props.style[pattern.name].startColor ||
-                    this.props.style[pattern.name].backgroundColor ||
-                    this.props.style[pattern.name].background ||
-                    pattern.colors[0],
-            stop: this.props.style[pattern.name].stopColor ||
-                    this.props.style[pattern.name].backgroundColor ||
-                    this.props.style[pattern.name].background ||
-                    pattern.colors[1],
-            back: this.props.style[pattern.name].back ||
-                    pattern.colors[2]
-        };
-        let background = `linear-gradient(to right, ${color.start} 0%, ${color.stop} ${value}%, ${color.back} ${value}%, ${color.back} )`;
-        target.style.backgroundImage = background;
     }
 
     onProgressChange = e => {
-        let progress = e.target.value;
+        let progress = parseFloat(e.target.value);
         this.setState({
             progress
         }, () => {
@@ -122,13 +93,8 @@ class Video extends React.Component{
             this.lastBuffered = buffered;
             let end = this._video.seekable.end(0);
             let percentage = parseInt( buffered / end * 100 );
-            this.seekProgressBarAppearance(this._buffer, percentage,{
-                name: "buffer",
-                colors: [
-                    "#666",
-                    "#666",
-                    "#000"
-                ]
+            this.setState({
+                buffer: percentage
             });
         }
     }
@@ -168,15 +134,6 @@ class Video extends React.Component{
         clearInterval( this.bufferCheckTimer );
     }
 
-    getStyle = () => {
-        let style = {
-            video: this.props.style.video || this.props.style,
-            videoWrapper: this.props.style.videoWrapper || {},
-            controlsWrapper: this.props.style.controlsWrapper || {}
-        }
-        return style;
-    }
-
     render(){
         let sources = this.props.sources.map( source => {
             if( typeof source == "string" ){
@@ -188,13 +145,13 @@ class Video extends React.Component{
                 return source;
             }
         })
-        let style = this.getStyle();
+
         return (
             <div className="reactVideoWrapper">
                 <video
                     className={`${this.props.className}`}
                     ref={this.referenceVideoTag}
-                    style={style.video}
+                    style={this.props.style}
                     width={this.props.width || "auto" }
                     height={this.props.height || "auto" }
                     {...this.props.attributes}
@@ -205,12 +162,31 @@ class Video extends React.Component{
                 </video>
                 <div
                     ref={ ref => this._controlsWrapper = ref }
-                    style={style.controlsWrapper}
+                    style={this.props.style.controlsWrapper || {}}
                     className="controlsWrapper"
                 >
                     <div className="seekBar">
-                        <input ref={ ref => this._buffer = ref } type="range" step="0.1" min="0" max="100" value={this.state.buffer} readonly="readonly" className="buffer"/>
-                        <input ref={ ref => this._progress = ref } type="range" step="0.1" min="0" max="100" value={this.state.progress} onChange={this.onProgressChange} onInput={this.onInput} className="progress"/>
+                        <Progress
+                            ref={ ref => this._progress = ref }
+                            value={this.state.progress}
+                            className="progress"
+                            attributes={{
+                                onChange: this.onProgressChange
+                            }}
+                        />
+                        <Progress
+                            ref={ ref => this._buffer = ref }
+                            value={this.state.buffer}
+                            className = "buffer"
+                            colors={{
+                                start: "#777",
+                                end: "#666",
+                                back: "#000"
+                            }}
+                            attributes={{
+                                readonly: "readonly"
+                            }}
+                        />
                     </div>
                     <div className="volumeBar"></div>
                     <div className="playButton"></div>
@@ -236,14 +212,16 @@ Video.propTypes = {
         React.PropTypes.number
     ]),
     className: React.PropTypes.string,
-    attributes: React.PropTypes.object
+    attributes: React.PropTypes.object,
+    controls: React.PropTypes.bool
 };
 
 Video.defaultProps = {
     sources: [],
     style: {},
     className: "",
-    attributes: []
+    attributes: {},
+    controls: true
 };
 
 export default Video;

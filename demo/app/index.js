@@ -24,10 +24,9 @@ class App extends React.Component{
     }
 
     onMetaDataLoaded = event => {
-        console.log( event );
-        setTimeout(() => {
-            event.target.play();
-        }, 5000);
+        // setTimeout(() => {
+        //     event.target.play();
+        // }, 5000);
         window.video = event.target;
     }
 
