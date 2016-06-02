@@ -21,7 +21,7 @@ The component can have every listener the origin video tag has.
 For example `<video sources={[url..]} metadataloaded={this._onLoaded.bind(this)}/>` calls the function _onLoaded, with the event as argument.  
 The video is so accessible through `event.target`.
 
-A list of events can be found [here]("http://www.w3schools.com/tags/ref_av_dom.asp").
+A list of events can be found [here](http://www.w3schools.com/tags/ref_av_dom.asp).
 
 The `sources` prop must be an array of objects or strings, representing the url of the video.
 If object is given, it must have `src` key representing the url.

@@ -51,6 +51,25 @@
             }
         }
 
+        .playButton{
+            width: 24px;
+            height: 24px;
+            position: absolute;
+            left: 5px;
+            bottom: 5px;
+            cursor: pointer;
+        }
+
+        .pauseButton{
+            width: 24px;
+            height: 24px;
+            position: absolute;
+            left: 5px;
+            bottom: 5px;
+            cursor: pointer;
+            display: none;
+        }
+
     }
 
     input[type=range]{

@@ -1,6 +1,7 @@
 import React from 'react';
 import VideoStyle from './style/video.scss';
 import Progress from './Progress';
+import icons from './assets/icons';
 
 class Video extends React.Component{
 
@@ -104,9 +105,33 @@ class Video extends React.Component{
         this.setState({ video }, () => {
             video.addEventListener( "loadedmetadata", this.onMetaDataLoaded );
             video.addEventListener( "timeupdate", this.onTimeUpdate );
+            video.addEventListener( "play", this.onPlay );
+            video.addEventListener( "pause", this.onPause );
             this.bufferCheckTimer = setInterval( this.checkBuffer, 500 );
             this.createListeners(video);
         });
+    }
+
+    onPlay = e => {
+        this._play.style.display = "none";
+        this._pause.style.display = "block";
+    }
+
+    onPause = e => {
+        this._pause.style.display = "none";
+        this._play.style.display = "block";
+    }
+
+    play = () => {
+        if( !this._video )
+            return;
+        this._video.play();
+    }
+
+    pause = () => {
+        if( !this._video )
+            return;
+        this._video.pause();
     }
 
     constructor(){
@@ -130,6 +155,8 @@ class Video extends React.Component{
             this.eventListeners = [];
             video.removeEventListener( "loadedmetadata", this.onMetaDataLoaded );
             video.removeEventListener( "timeupdate", this.onTimeUpdate );
+            video.removeEventListener( "play", this.onPlay );
+            video.removeEventListener( "pause", this.onPause );
         }
         clearInterval( this.bufferCheckTimer );
     }
@@ -144,7 +171,7 @@ class Video extends React.Component{
                 }
                 return source;
             }
-        })
+        });
 
         return (
             <div className="reactVideoWrapper">
@@ -188,9 +215,15 @@ class Video extends React.Component{
                             }}
                         />
                     </div>
+                    <div className="playButton" ref={ref => this._play = ref} onClick={this.play}>
+                        {icons.play}
+                    </div>
+                    <div className="pauseButton" ref={ ref => this._pause = ref} onClick={this.pause}>
+                        {icons.pause}
+                    </div>
                     <div className="volumeBar"></div>
-                    <div className="playButton"></div>
-                    <div className="pauseButton"></div>
+
+
                     <div className="fullscreenButton"></div>
 
                 </div>
