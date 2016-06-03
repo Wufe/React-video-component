@@ -24,18 +24,78 @@ A list of events can be found [here](http://www.w3schools.com/tags/ref_av_dom.as
 
 Props:
 
-| Property       | Type | Default | Description |
-| :------------- | :------------- |
-| sources | Array | [] | Defines sources for the video. Must be an array of objects or strings, representing the url of the video. If object is given, it must have `src` key representing the url. |
-| style | Object | {} | Style object that will apply to video tag element. |
-| className | String | "" | Name of the class that will apply to video tag element. |
-| attributes | Object | {} | Standard props of the video element ( e.g. "loop", "controls" ). |
-| controls | Bool | true | Show or hide controls. |
-| width | String | "auto" | Width of the video element. |
-| height | String | "auto" | Height of the video element. |
-| autohide | Bool | true | Automatically hide controls and overlay ( if "fixedoverlay" set to false ) |
-| overlay | Bool | true | Show or hide overlay. |
-| fixedoverlay | Bool | false | Disable autohide for overlay. |
+<table>
+    <thead>
+        <tr>
+            <th>Property</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>sources</td>
+            <td>Array</td>
+            <td>[]</td>
+            <td>Defines sources for the video. Must be an array of objects or strings, representing the url of the video. If object is given, it must have `src` key representing the url.</td>
+        </tr>
+        <tr>
+            <td>style</td>
+            <td>Object</td>
+            <td>{}</td>
+            <td>Style object that will apply to video tag element.</td>
+        </tr>
+        <tr>
+            <td>className</td>
+            <td>String</td>
+            <td>""</td>
+            <td>Name of the class that will apply to video tag element.</td>
+        </tr>
+        <tr>
+            <td>attributes</td>
+            <td>Object</td>
+            <td>{}</td>
+            <td>Standard props of the video element ( e.g. "loop", "controls" ).</td>
+        </tr>
+        <tr>
+            <td>controls</td>
+            <td>Bool</td>
+            <td>true</td>
+            <td>Show or hide controls.</td>
+        </tr>
+        <tr>
+            <td>autohide</td>
+            <td>Bool</td>
+            <td>true</td>
+            <td>Automatically hide controls and overlay ( if "fixedoverlay" set to false ).</td>
+        </tr>
+        <tr>
+            <td>overlay</td>
+            <td>Bool</td>
+            <td>true</td>
+            <td>Show or hide overlay.</td>
+        </tr>
+        <tr>
+            <td>fixedoverlay</td>
+            <td>Bool</td>
+            <td>false</td>
+            <td>Disable autohide for overlay.</td>
+        </tr>
+        <tr>
+            <td>width</td>
+            <td>String</td>
+            <td>""</td>
+            <td>Width of the video element.</td>
+        </tr>
+        <tr>
+            <td>height</td>
+            <td>String</td>
+            <td>""</td>
+            <td>Height of the video element.</td>
+        </tr>
+    </tbody>
+</table>
 
 ### Known issues
 
