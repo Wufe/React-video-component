@@ -16,8 +16,9 @@ class Progress extends React.Component{
     componentWillUnmount(){}
 
     render(){
+        let value = 100/parseInt(this.props.max)*this.props.value;
         let style = {
-            backgroundImage: `linear-gradient(to right, ${this.props.colors.start} 0%, ${this.props.colors.end} ${this.props.value}%, ${this.props.colors.back} ${this.props.value}%, ${this.props.colors.back} )`
+            backgroundImage: `linear-gradient(to right, ${this.props.colors.start} 0%, ${this.props.colors.end} ${value}%, ${this.props.colors.back} ${value}%, ${this.props.colors.back} )`
         };
         return (
             <input
@@ -37,10 +38,22 @@ class Progress extends React.Component{
 }
 
 Progress.propTypes = {
-    step: React.PropTypes.number,
-    min: React.PropTypes.number,
-    max: React.PropTypes.number,
-    value: React.PropTypes.number,
+    step: React.PropTypes.oneOfType([
+        React.PropTypes.number,
+        React.PropTypes.string
+    ]),
+    min: React.PropTypes.oneOfType([
+        React.PropTypes.number,
+        React.PropTypes.string
+    ]),
+    max: React.PropTypes.oneOfType([
+        React.PropTypes.number,
+        React.PropTypes.string
+    ]),
+    value: React.PropTypes.oneOfType([
+        React.PropTypes.number,
+        React.PropTypes.string
+    ]),
     className: React.PropTypes.string,
     // Standard html tag attributes
     attributes: React.PropTypes.object,
