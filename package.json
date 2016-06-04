@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Wufe/React-video-component.git"
+    "url": "git+https://github.com/Wufe/react-video-component.git"
   },
   "keywords": [
     "video",
@@ -35,9 +35,9 @@
   "author": "Wufe <simone.bembi@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Wufe/React-video-component/issues"
+    "url": "https://github.com/Wufe/react-video-component/issues"
   },
-  "homepage": "https://github.com/Wufe/React-video-component#readme",
+  "homepage": "https://github.com/Wufe/react-video-component#readme",
   "devDependencies": {
     "babel-core": "^6.9.1",
     "babel-loader": "^6.2.4",
