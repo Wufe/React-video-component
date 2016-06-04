@@ -100,4 +100,3 @@ Props:
 ### Known issues
 
 + Weird IE render issues. Custom controls will be disabled.
-+ Fullscreen mode is not detected.

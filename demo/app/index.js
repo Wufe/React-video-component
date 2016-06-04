@@ -29,7 +29,7 @@ class App extends React.Component{
     }
 
     play = event => {
-        event.target.play();
+        //event.target.play();
     }
 
     render(){

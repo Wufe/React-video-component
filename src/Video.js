@@ -82,7 +82,8 @@ class Video extends React.Component{
         let time = `${hours > 9 ? hours : ("0" + hours)}:${minutes > 9 ? minutes : ("0" + minutes) }:${seconds > 9 ? seconds : ("0" + seconds)}`;
         this.setState({
             progress: percentage,
-            time
+            time,
+            currentTime: current
         });
     }
 
@@ -139,9 +140,25 @@ class Video extends React.Component{
             video.addEventListener( "play", this.onPlay );
             video.addEventListener( "pause", this.onPause );
             video.addEventListener( "volumechange", this.onVolumeChange );
+            document.addEventListener( "keyup", this.onKeyUp );
             this.bufferCheckTimer = setInterval( this.checkBuffer, 500 );
+            this.fullscreenCheckTimer = setInterval( this.checkFullscreen, 500 );
             this.createListeners(video);
         });
+    }
+
+    checkFullscreen = () => {
+        let isFullscreen = undefined;
+        if( document.webkitIsFullScreen !== undefined ){
+            isFullscreen = document.webkitIsFullScreen;
+        }else if( document.mozFullScreen !== undefined ){
+            isFullscreen = document.mozFullScreen;
+        }else if( document.msFullscreenElement !== undefined ){
+            isFullscreen = document.msFullscreenElement !== null;
+        }
+        if( isFullscreen !== undefined ){
+            this.setState({ fullscreen: isFullscreen });
+        }
     }
 
     onMouseMove = e => {
@@ -236,7 +253,7 @@ class Video extends React.Component{
         }else if( element.mozRequestFullScreen ){
             return element.mozRequestFullScreen();
         }else if( element.webkitRequestFullscreen ){
-            return element.webkitRequestFullscreen();
+            return element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
         }
     }
 
@@ -266,6 +283,94 @@ class Video extends React.Component{
         });
     }
 
+    togglePlay = () => {
+        if( this.state.playing ){
+            this.pause();
+        }else{
+            this.play();
+        }
+    }
+
+    back = () => {
+        if( !this._video )
+            return;
+        let currentTime = this._video.currentTime;
+        let end = this._video.seekable.end(0);
+        if( currentTime -5 <= 0 ){
+            this._video.currentTime = 0;
+        }else{
+            this._video.currentTime = currentTime -5;
+        }
+        let progress = this._video.currentTime/end*100;
+        this.setState({
+            progress
+        }, () => {
+            this.onTimeUpdate({target: this._video});
+        });
+    }
+
+    forward = () => {
+        if( !this._video )
+            return;
+        let currentTime = this._video.currentTime;
+        let end = this._video.seekable.end(0);
+        if( currentTime +5 >= end ){
+            this._video.currentTime = end;
+        }else{
+            this._video.currentTime = currentTime +5;
+        }
+        let progress = this._video.currentTime/end*100;
+        this.setState({
+            progress
+        }, () => {
+            this.onTimeUpdate({target: this._video});
+        });
+    }
+
+    volumeUp = () => {
+        if( this.state.volume >= 1 )
+            return;
+        this.setState({
+            volume: this.state.volume +0.1
+        });
+    }
+
+    volumeDown = () => {
+        if( this.state.volume <= 0 )
+            return;
+        this.setState({
+            volume: this.state.volume -0.1
+        });
+    }
+
+    onKeyUp = e => {
+        if( this.props.shortcuts ){
+            let keyCode = e.keyCode;
+            switch( keyCode ){
+                case 32:{ // space
+                    this.togglePlay();
+                    break;
+                }
+                case 39: {
+                    this.forward();
+                    break;
+                }
+                case 37: {
+                    this.back();
+                    break;
+                }
+                case 38: {
+                    this.volumeUp();
+                    break;
+                }
+                case 40: {
+                    this.volumeDown();
+                    break;
+                }
+            }
+        }
+    }
+
     constructor(){
         super();
         this._controlsWrapper = {};
@@ -279,9 +384,11 @@ class Video extends React.Component{
             time: "00:00:00",
             playing: false,
             loaded: false,
-            isIE: false
+            isIE: false,
+            currentTime: 0
         };
         this.bufferCheckTimer = {};
+        this.fullscreenCheckTimer = {};
     }
 
     componentWillUnmount(){
@@ -296,8 +403,10 @@ class Video extends React.Component{
             video.removeEventListener( "play", this.onPlay );
             video.removeEventListener( "pause", this.onPause );
             video.removeEventListener( "volumechange", this.onVolumeChange );
+            document.removeEventListener( "keyup", this.onKeyUp );
         }
         clearInterval( this.bufferCheckTimer );
+        clearInterval( this.fullscreenCheckTimer );
     }
 
     render(){
@@ -478,7 +587,9 @@ Video.propTypes = {
     // Overlay enabled
     overlay: React.PropTypes.bool,
     // Overlay does not autohide
-    fixedoverlay: React.PropTypes.bool
+    fixedoverlay: React.PropTypes.bool,
+    // Enable or disable keyboard shortcuts
+    shortcuts: React.PropTypes.bool
 };
 
 Video.defaultProps = {
@@ -491,7 +602,8 @@ Video.defaultProps = {
     overlay: true,
     fixedoverlay: false,
     width: "auto",
-    height: "100%"
+    height: "100%",
+    shortcuts: true
 };
 
 export default Video;
