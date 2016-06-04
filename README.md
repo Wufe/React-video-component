@@ -85,13 +85,13 @@ Props:
         <tr>
             <td>width</td>
             <td>String</td>
-            <td>""</td>
+            <td>"auto"</td>
             <td>Width of the video element.</td>
         </tr>
         <tr>
             <td>height</td>
             <td>String</td>
-            <td>""</td>
+            <td>"100%"</td>
             <td>Height of the video element.</td>
         </tr>
     </tbody>
@@ -99,5 +99,5 @@ Props:
 
 ### Known issues
 
-+ Weird IE render issues
-+ Fullscreen mode is not detected
++ Weird IE render issues. Custom controls will be disabled.
++ Fullscreen mode is not detected.

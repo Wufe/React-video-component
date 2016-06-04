@@ -25,8 +25,11 @@ class App extends React.Component{
     }
 
     onMetaDataLoaded = event => {
-        //event.target.play();
         window.video = event.target;
+    }
+
+    play = event => {
+        event.target.play();
     }
 
     render(){
@@ -38,12 +41,12 @@ class App extends React.Component{
                     attributes={{
                         loop: true
                     }}
-                    controls={true}
                     loadedmetadata={this.onMetaDataLoaded}
+                    canplaythrough={this.play}
                     timeupdate={this.onTimeUpdate}
                     sources={[
                         {
-                            src: "http://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_50mb.mp4",
+                            src: "https://wufe.me/sample2.mp4",
                             type: "video/mp4"
                         }
                     ]}

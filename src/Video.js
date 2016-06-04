@@ -48,12 +48,26 @@ class Video extends React.Component{
     };
 
     onMetaDataLoaded = e => {
-        if( this.props.attributes.controls )
-            this._controlsWrapper.style.display = "none";
-        if( this.props.controls )
-            this._controlsWrapper.style.opacity = "1";
+        if( e.target.msRequestFullscreen ){ // Check if is IE and disable custom controls
+            this.setState({
+                isIE: true
+            }, () => {
+                this._controlsWrapper.style.display = "none";
+                this._overlay.style.bottom = "65px";
+            });
+        }else{
+            this.setState({
+                isIE: false
+            });
+            if( this.props.attributes.controls )
+                this._controlsWrapper.style.display = "none";
+            if( this.props.controls )
+                this._controlsWrapper.style.opacity = "1";
+        }
+
         if( this.props.overlay )
             this._overlay.style.opacity = "1";
+        this.setState({ loaded: true });
     }
 
     onTimeUpdate = e => {
@@ -135,29 +149,27 @@ class Video extends React.Component{
     }
 
     triggerMouseMove = () => {
-        if( this.props.attributes.controls )
-            return;
-        if( !this.props.autohide )
-            return;
-        if( this.props.controls )
-            this._controlsWrapper.style.opacity = "1";
-        if( this.props.overlay )
-            this._overlay.style.opacity = "1";
-        if( this.hideTimer )
-            clearTimeout(this.hideTimer);
-        this.hideTimer = setTimeout(() => {
-            if( this.state.playing ){
-                this._controlsWrapper.style.opacity = "0";
-                if( this.props.overlay && !this.props.fixedoverlay )
-                    this._overlay.style.opacity = "0";
-            }
+        if( this.state.loaded ){
+            if( !this.props.autohide )
+                return;
+            if( this.props.controls && !this.props.attributes.controls )
+                this._controlsWrapper.style.opacity = "1";
+            if( this.props.overlay )
+                this._overlay.style.opacity = "1";
+            if( this.hideTimer )
+                clearTimeout(this.hideTimer);
+            this.hideTimer = setTimeout(() => {
+                if( this.state.playing ){
+                    this._controlsWrapper.style.opacity = "0";
+                    if( this.props.overlay && !this.props.fixedoverlay )
+                        this._overlay.style.opacity = "0";
+                }
 
-        }, 3000 );
+            }, 3000 );
+        }
     }
 
     onPlay = e => {
-        // this._play.style.display = "none";
-        // this._pause.style.display = "block";
         this.setState({
             playing: true
         }, () => {
@@ -166,8 +178,6 @@ class Video extends React.Component{
     }
 
     onPause = e => {
-        // this._pause.style.display = "none";
-        // this._play.style.display = "block";
         this.setState({
             playing: false
         });
@@ -267,7 +277,9 @@ class Video extends React.Component{
             volume: 1,
             fullscreen: false,
             time: "00:00:00",
-            playing: false
+            playing: false,
+            loaded: false,
+            isIE: false
         };
         this.bufferCheckTimer = {};
     }
@@ -300,6 +312,11 @@ class Video extends React.Component{
             }
         });
 
+        let videoProps = this.props.attributes;
+        if( this.state.isIE ){
+            videoProps.controls = true;
+        }
+
         return (
             <div
                 className="reactVideoWrapper"
@@ -323,7 +340,7 @@ class Video extends React.Component{
                     style={this.props.style}
                     width={this.props.width}
                     height={this.props.height}
-                    {...this.props.attributes}
+                    {...videoProps}
                     >
                         {
                             sources.map( (s, i) => <source key={i} src={s.src} type={s.type || null} />)
@@ -353,7 +370,7 @@ class Video extends React.Component{
                                 back: "#000"
                             }}
                             attributes={{
-                                readonly: "readonly"
+                                readOnly: true
                             }}
                         />
                     </div>
@@ -474,7 +491,7 @@ Video.defaultProps = {
     overlay: true,
     fixedoverlay: false,
     width: "auto",
-    height: "auto"
+    height: "100%"
 };
 
 export default Video;
