@@ -1,9 +1,0 @@
-node_modules/
-.DS_Store
-npm-debug*
-demo/
-build/
-webpack.demo.config.js
-webpack.config.js
-README.MD
-changelog.md
