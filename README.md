@@ -89,7 +89,7 @@ Props:
             <td>Enable or disable keyboard shortcuts.</td>
         </tr>
         <tr>
-            <td>tabInde</td>
+            <td>tabIndex</td>
             <td>String</td>
             <td>"1"</td>
             <td>Tab index of the wrapper element.</td>
