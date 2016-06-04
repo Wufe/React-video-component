@@ -83,6 +83,18 @@ Props:
             <td>Disable autohide for overlay.</td>
         </tr>
         <tr>
+            <td>shortcuts</td>
+            <td>Bool</td>
+            <td>true</td>
+            <td>Enable or disable keyboard shortcuts.</td>
+        </tr>
+        <tr>
+            <td>tabInde</td>
+            <td>String</td>
+            <td>"1"</td>
+            <td>Tab index of the wrapper element.</td>
+        </tr>
+        <tr>
             <td>width</td>
             <td>String</td>
             <td>"auto"</td>

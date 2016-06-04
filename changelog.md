@@ -1,2 +1,1 @@
-Detected fullscreen. Now the icon works better.  
-Added keyboard shortcuts.
+Added fullscreen keyboard shortcut (F) and changed keyup listener to act only on the videowrapper.

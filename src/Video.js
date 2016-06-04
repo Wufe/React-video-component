@@ -140,7 +140,6 @@ class Video extends React.Component{
             video.addEventListener( "play", this.onPlay );
             video.addEventListener( "pause", this.onPause );
             video.addEventListener( "volumechange", this.onVolumeChange );
-            document.addEventListener( "keyup", this.onKeyUp );
             this.bufferCheckTimer = setInterval( this.checkBuffer, 500 );
             this.fullscreenCheckTimer = setInterval( this.checkFullscreen, 500 );
             this.createListeners(video);
@@ -283,6 +282,14 @@ class Video extends React.Component{
         });
     }
 
+    toggleFullscreen = () => {
+        if( this.state.fullscreen ){
+            this.onDefaultscreenSet({});
+        }else{
+            this.onFullscreenSet({});
+        }
+    }
+
     togglePlay = () => {
         if( this.state.playing ){
             this.pause();
@@ -347,24 +354,28 @@ class Video extends React.Component{
         if( this.props.shortcuts ){
             let keyCode = e.keyCode;
             switch( keyCode ){
-                case 32:{ // space
+                case 32: { // Space
                     this.togglePlay();
                     break;
                 }
                 case 39: {
-                    this.forward();
+                    this.forward(); // Right arrow
                     break;
                 }
                 case 37: {
-                    this.back();
+                    this.back(); // Left arrow
                     break;
                 }
                 case 38: {
-                    this.volumeUp();
+                    this.volumeUp(); // Up arrow
                     break;
                 }
                 case 40: {
-                    this.volumeDown();
+                    this.volumeDown(); // Down arrow
+                    break;
+                }
+                case 70: { // F
+                    this.toggleFullscreen();
                     break;
                 }
             }
@@ -403,7 +414,6 @@ class Video extends React.Component{
             video.removeEventListener( "play", this.onPlay );
             video.removeEventListener( "pause", this.onPause );
             video.removeEventListener( "volumechange", this.onVolumeChange );
-            document.removeEventListener( "keyup", this.onKeyUp );
         }
         clearInterval( this.bufferCheckTimer );
         clearInterval( this.fullscreenCheckTimer );
@@ -430,6 +440,8 @@ class Video extends React.Component{
             <div
                 className="reactVideoWrapper"
                 onMouseMove={this.onMouseMove}
+                tabIndex={this.props.tabIndex}
+                onKeyUp={this.onKeyUp}
                 ref={ref => this._wrapper = ref}
             >
                 <div
@@ -589,7 +601,8 @@ Video.propTypes = {
     // Overlay does not autohide
     fixedoverlay: React.PropTypes.bool,
     // Enable or disable keyboard shortcuts
-    shortcuts: React.PropTypes.bool
+    shortcuts: React.PropTypes.bool,
+    tabIndex: React.PropTypes.string
 };
 
 Video.defaultProps = {
@@ -603,7 +616,8 @@ Video.defaultProps = {
     fixedoverlay: false,
     width: "auto",
     height: "100%",
-    shortcuts: true
+    shortcuts: true,
+    tabIndex: "1"
 };
 
 export default Video;
