@@ -48,7 +48,8 @@ class Video extends React.Component{
     };
 
     onMetaDataLoaded = e => {
-        if( e.target.msRequestFullscreen ){ // Check if is IE and disable custom controls
+        let UA = window.navigator.userAgent;
+        if( UA.match( /MSIE/i ) || UA.match( /Edge/i ) ){ // Check if is IE and disable custom controls
             this.setState({
                 isIE: true
             }, () => {
@@ -150,8 +151,8 @@ class Video extends React.Component{
         let isFullscreen = undefined;
         if( document.webkitIsFullScreen !== undefined ){
             isFullscreen = document.webkitIsFullScreen;
-        }else if( document.mozFullScreen !== undefined ){
-            isFullscreen = document.mozFullScreen;
+        }else if( document.fullscreenElement !== undefined ){
+            isFullscreen = document.fullscreenElement !== null;
         }else if( document.msFullscreenElement !== undefined ){
             isFullscreen = document.msFullscreenElement !== null;
         }
