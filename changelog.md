@@ -1,2 +1,1 @@
-Moved event listeners, utilities and actions into other classes.
-Added autohidecursor that automatically hides cursor when playing.
+Added doubleclick for fullscreen and wheel scroll for volume.

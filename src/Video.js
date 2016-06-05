@@ -162,6 +162,14 @@ class Video extends React.Component{
         this.videoActions.exitFullscreen();
     }
 
+    onWheel = e => {
+        if(e.deltaY < 0){
+            this.videoActions.volumeUp();
+        }else{
+            this.videoActions.volumeDown();
+        }
+    }
+
     onKeyDown = e => {
         if( this.props.shortcuts ){
             let keyCode = e.keyCode;
@@ -221,11 +229,13 @@ class Video extends React.Component{
                 onMouseMove={this.onMouseMove}
                 tabIndex={this.props.tabIndex}
                 onKeyDown={this.onKeyDown}
+                onWheel={this.onWheel}
                 ref={ref => this._wrapper = ref}
             >
                 <div
                     className="overlayContainer"
                     onMouseMove={this.onMouseMove}
+                    onDoubleClick={this.videoActions.toggleFullscreen}
                     ref={ref => this._overlay = ref}
                     style={{
                         display: this.props.overlay ? "block" : "none"
@@ -236,6 +246,7 @@ class Video extends React.Component{
                 <video
                     className={`${this.props.className}`}
                     onMouseMove={this.onMouseMove}
+                    onDoubleClick={this.videoActions.toggleFullscreen}
                     ref={this.referenceVideoTag}
                     style={this.props.style}
                     width={this.props.width}

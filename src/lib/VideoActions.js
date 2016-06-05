@@ -15,14 +15,6 @@ export default class VideoActions{
         this.videoComponent._video.pause();
     }
 
-    togglePlay(){
-        if( this.videoComponent.state.playing ){
-            this.pause();
-        }else{
-            this.play();
-        }
-    }
-
     mute(){
         if( !this.videoComponent._video )
             return;
@@ -49,14 +41,6 @@ export default class VideoActions{
             this.videoComponent._muteButton.style.display = "block";
             this.videoComponent._unmuteButton.style.display = "none";
         });
-    }
-
-    toggleMute(){
-        if( !this.muted ){
-            this.mute();
-        }else{
-            this.unmute();
-        }
     }
 
     volumeUp(){
@@ -147,11 +131,27 @@ export default class VideoActions{
         });
     }
 
-    toggleFullscreen(){
+    toggleFullscreen = () => {
         if( this.videoComponent.state.fullscreen ){
             this.videoComponent.onDefaultscreenSet({});
         }else{
             this.videoComponent.onFullscreenSet({});
+        }
+    }
+
+    toggleMute = () => {
+        if( !this.muted ){
+            this.mute();
+        }else{
+            this.unmute();
+        }
+    }
+
+    togglePlay = () => {
+        if( this.videoComponent.state.playing ){
+            this.pause();
+        }else{
+            this.play();
         }
     }
 };
