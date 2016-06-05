@@ -21,7 +21,11 @@ class App extends React.Component{
     }
 
     onTimeUpdate = event => {
-        document.location.hash = parseInt(event.target.currentTime);
+        if( !history || !history.replaceState ){
+            document.location.hash = parseInt(event.target.currentTime);
+        }else{
+            history.replaceState( null, null, "#" + parseInt(event.target.currentTime) );
+        }
     }
 
     onMetaDataLoaded = event => {
@@ -29,7 +33,7 @@ class App extends React.Component{
     }
 
     play = event => {
-        //event.target.play();
+        event.target.play();
     }
 
     render(){
@@ -42,7 +46,6 @@ class App extends React.Component{
                         loop: true
                     }}
                     loadedmetadata={this.onMetaDataLoaded}
-                    canplaythrough={this.play}
                     timeupdate={this.onTimeUpdate}
                     sources={[
                         {

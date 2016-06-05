@@ -72,7 +72,7 @@ class Video extends React.Component{
 
     onTimeUpdate = e => {
         let current = e.target.currentTime;
-        let end = e.target.seekable.end(0);
+        let end = e.target.duration;
         let percentage = parseInt(current/end*100*100)/100; // in order to approximate to 2 digits
         let seconds = parseInt(current);
         let hours = parseInt(seconds / 3600);
@@ -94,9 +94,9 @@ class Video extends React.Component{
         }, () => {
             if( !this._video )
                 return;
-            if( this._video.seekable.length < 1 )
+            if( !this._video.duration )
                 return;
-            let end = this._video.seekable.end(0);
+            let end = this._video.duration;
             let time = progress*end/100;
             this._video.currentTime = time;
         })
@@ -121,10 +121,10 @@ class Video extends React.Component{
             return;
         let buffered = this._video.buffered.end(this._video.buffered.length-1);
         if( this.lastBuffered != buffered ){
-            if( this._video.seekable.length < 1 )
+            if( !this._video.duration )
                 return;
             this.lastBuffered = buffered;
-            let end = this._video.seekable.end(0);
+            let end = this._video.duration;
             let percentage = parseInt( buffered / end * 100 );
             this.setState({
                 buffer: percentage
@@ -225,6 +225,7 @@ class Video extends React.Component{
         this.setState({
             volume: 0
         }, () => {
+            this.muted = true;
             this._video.volume = 0;
             this._muteButton.style.display = "none";
             this._unmuteButton.style.display = "block";
@@ -238,6 +239,7 @@ class Video extends React.Component{
         this.setState({
             volume
         }, () => {
+            this.muted = false;
             this._video.volume = volume;
             this._muteButton.style.display = "block";
             this._unmuteButton.style.display = "none";
@@ -298,11 +300,19 @@ class Video extends React.Component{
         }
     }
 
+    toggleMute = () => {
+        if( !this.muted ){
+            this.mute();
+        }else{
+            this.unmute();
+        }
+    }
+
     back = () => {
         if( !this._video )
             return;
         let currentTime = this._video.currentTime;
-        let end = this._video.seekable.end(0);
+        let end = this._video.duration;
         if( currentTime -5 <= 0 ){
             this._video.currentTime = 0;
         }else{
@@ -320,7 +330,7 @@ class Video extends React.Component{
         if( !this._video )
             return;
         let currentTime = this._video.currentTime;
-        let end = this._video.seekable.end(0);
+        let end = this._video.duration;
         if( currentTime +5 >= end ){
             this._video.currentTime = end;
         }else{
@@ -337,20 +347,26 @@ class Video extends React.Component{
     volumeUp = () => {
         if( this.state.volume >= 1 )
             return;
+        let volume = this.state.volume +0.1;
         this.setState({
-            volume: this.state.volume +0.1
+            volume
+        }, () => {
+            this._video.volume = volume;
         });
     }
 
     volumeDown = () => {
         if( this.state.volume <= 0 )
             return;
+        let volume = this.state.volume -0.1;
         this.setState({
-            volume: this.state.volume -0.1
+            volume
+        }, () => {
+            this._video.volume = volume;
         });
     }
 
-    onKeyUp = e => {
+    onKeyDown = e => {
         if( this.props.shortcuts ){
             let keyCode = e.keyCode;
             switch( keyCode ){
@@ -376,6 +392,10 @@ class Video extends React.Component{
                 }
                 case 70: { // F
                     this.toggleFullscreen();
+                    break;
+                }
+                case 77: {
+                    this.toggleMute();
                     break;
                 }
             }
@@ -441,7 +461,7 @@ class Video extends React.Component{
                 className="reactVideoWrapper"
                 onMouseMove={this.onMouseMove}
                 tabIndex={this.props.tabIndex}
-                onKeyUp={this.onKeyUp}
+                onKeyDown={this.onKeyDown}
                 ref={ref => this._wrapper = ref}
             >
                 <div

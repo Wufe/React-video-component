@@ -8,7 +8,7 @@
     "build-dist": "webpack --config webpack.dist.config.js",
     "build-demo": "webpack --config webpack.demo.config.js",
     "dev": "concurrently \"webpack -wd\" \"webpack --config webpack.demo.config.js -wd\"",
-    "deploy": "concurrently \"npm run build\" \"npm run build-dist\" \"npm run build-demo\""
+    "build-all": "concurrently \"npm run build\" \"npm run build-dist\" \"npm run build-demo\""
   },
   "babel": {
     "presets": [
