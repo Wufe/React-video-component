@@ -1,5 +1,4 @@
 import React from 'react';
-import VideoStyle from './style/video.scss';
 
 class Progress extends React.Component{
 

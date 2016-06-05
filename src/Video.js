@@ -1,90 +1,67 @@
-import React from 'react';
-import VideoStyle from './style/video.scss';
-import Progress from './Progress';
 import icons from './assets/icons';
+import Progress from './Progress';
+import React from 'react';
+import VideoActions from './lib/VideoActions';
+import VideoEventHandler from './lib/VideoEventHandler';
+import VideoStyle from './style/video.scss';
+import VideoUtils from './lib/VideoUtils';
 
 class Video extends React.Component{
 
-    events = [
-        "abort",
-        "canplay",
-        "canplaythrough",
-        "durationchange",
-        "emptied",
-        "ended",
-        "error",
-        "loadedmetadata",
-        "loadstart",
-        "pause",
-        "play",
-        "playing",
-        "progress",
-        "ratechange",
-        "seeked",
-        "seeking",
-        "stalled",
-        "timeupdate",
-        "volumechange",
-        "waiting"
-    ];
+    constructor(){
+        super();
+        this.eventHandler = new VideoEventHandler(this);
+        this.videoUtils = new VideoUtils(this);
+        this.videoActions = new VideoActions(this);
+        this.state = {
+            buffer: 0,
+            progress: 0,
+            volume: 1,
+            fullscreen: false,
+            time: "00:00:00",
+            playing: false,
+            loaded: false,
+            isIE: false,
+            currentTime: 0
+        };
+        this.bufferCheckTimer = {};
+        this.fullscreenCheckTimer = {};
+    }
 
-    eventListeners = [];
-
-    createListeners = video => {
-        this.eventListeners = [];
-        this.events.map( eventName => {
-            let listenerName = `on${eventName}`;
-            let listener = event => {
-                if( typeof this.props[eventName] == "function" ){
-                    this.props[eventName]( event );
-                }
-            }
-            video.addEventListener( eventName, listener );
-            this.eventListeners.push({
-                event: eventName,
-                listener
-            });
-        });
-    };
+    componentWillUnmount(){
+        let video = this._video;
+        if( !video )
+            return;
+        this.eventHandler.removeListeners();
+        this.eventHandler.detachListeners();
+        clearInterval( this.bufferCheckTimer );
+        clearInterval( this.fullscreenCheckTimer );
+    }
 
     onMetaDataLoaded = e => {
-        let UA = window.navigator.userAgent;
-        if( UA.match( /MSIE/i ) || UA.match( /Edge/i ) ){ // Check if is IE and disable custom controls
-            this.setState({
-                isIE: true
-            }, () => {
-                this._controlsWrapper.style.display = "none";
-                this._overlay.style.bottom = "65px";
-            });
-        }else{
-            this.setState({
-                isIE: false
-            });
-            if( this.props.attributes.controls )
-                this._controlsWrapper.style.display = "none";
-            if( this.props.controls )
-                this._controlsWrapper.style.opacity = "1";
-        }
-
-        if( this.props.overlay )
-            this._overlay.style.opacity = "1";
-        this.setState({ loaded: true });
+        let isIE = this.videoUtils.isIE();
+        this.setState({
+            isIE
+        }, () => {
+            if( isIE ){
+                this.videoUtils.disableControls();
+                this.videoUtils.moveOverlay();
+            }else{
+                this.videoUtils.enableControls();
+            }
+            this.videoUtils.enableOverlay();
+            this.setState({ loaded: true });
+        });
     }
 
     onTimeUpdate = e => {
-        let current = e.target.currentTime;
-        let end = e.target.duration;
-        let percentage = parseInt(current/end*100*100)/100; // in order to approximate to 2 digits
-        let seconds = parseInt(current);
-        let hours = parseInt(seconds / 3600);
-        seconds -= hours*3600;
-        let minutes = parseInt(seconds / 60);
-        seconds -= minutes*60;
-        let time = `${hours > 9 ? hours : ("0" + hours)}:${minutes > 9 ? minutes : ("0" + minutes) }:${seconds > 9 ? seconds : ("0" + seconds)}`;
+        let {currentTime, duration} = e.target
+        let progress = this.videoUtils.calculatePercentage(currentTime, duration);
+        let time = this.videoUtils.formatTimeFromSeconds(currentTime);
         this.setState({
-            progress: percentage,
+            progress,
             time,
-            currentTime: current
+            currentTime
         });
     }
 
@@ -93,71 +70,36 @@ class Video extends React.Component{
         this.setState({
             progress
         }, () => {
-            if( !this._video )
-                return;
-            if( !this._video.duration )
-                return;
-            let end = this._video.duration;
-            let time = progress*end/100;
+            let {duration} = this._video;
+            let time = progress*duration/100;
             this._video.currentTime = time;
         })
     }
 
     onVolumeSet = e => {
         let volume = parseFloat(e.target.value);
-        this.setState({
-            volume
-        }, () => {
-            this._video.volume = volume;
-        });
+        this.videoActions.setVolume(volume);
     }
 
     checkBuffer = () => {
-        if( !this._video )
-            return;
-        if( !this.lastSought ){
-            this.lastBuffered = 0;
-        }
-        if( this._video.buffered.length < 1 )
-            return;
-        let buffered = this._video.buffered.end(this._video.buffered.length-1);
-        if( this.lastBuffered != buffered ){
-            if( !this._video.duration )
-                return;
-            this.lastBuffered = buffered;
-            let end = this._video.duration;
-            let percentage = parseInt( buffered / end * 100 );
-            this.setState({
-                buffer: percentage
-            });
-        }
+        let buffer = this.videoUtils.calculateBuffer();
+        this.setState({
+            buffer
+        });
     }
 
     referenceVideoTag = video => {
         this._video = video;
-        this.setState({ video }, () => {
-            video.addEventListener( "loadedmetadata", this.onMetaDataLoaded );
-            video.addEventListener( "timeupdate", this.onTimeUpdate );
-            video.addEventListener( "play", this.onPlay );
-            video.addEventListener( "pause", this.onPause );
-            video.addEventListener( "volumechange", this.onVolumeChange );
-            this.bufferCheckTimer = setInterval( this.checkBuffer, 500 );
-            this.fullscreenCheckTimer = setInterval( this.checkFullscreen, 500 );
-            this.createListeners(video);
-        });
+        this.eventHandler.attachListeners();
+        this.eventHandler.createListeners();
+        this.bufferCheckTimer = setInterval( this.checkBuffer, 500 );
+        this.fullscreenCheckTimer = setInterval( this.checkFullscreen, 500 );
     }
 
     checkFullscreen = () => {
-        let isFullscreen = undefined;
-        if( document.webkitIsFullScreen !== undefined ){
-            isFullscreen = document.webkitIsFullScreen;
-        }else if( document.fullscreenElement !== undefined ){
-            isFullscreen = document.fullscreenElement !== null;
-        }else if( document.msFullscreenElement !== undefined ){
-            isFullscreen = document.msFullscreenElement !== null;
-        }
-        if( isFullscreen !== undefined ){
-            this.setState({ fullscreen: isFullscreen });
+        let fullscreen = this.videoUtils.isFullscreen();
+        if( fullscreen !== undefined ){
+            this.setState({ fullscreen });
         }
     }
 
@@ -173,6 +115,7 @@ class Video extends React.Component{
                 this._controlsWrapper.style.opacity = "1";
             if( this.props.overlay )
                 this._overlay.style.opacity = "1";
+            this._wrapper.style.cursor = "auto";
             if( this.hideTimer )
                 clearTimeout(this.hideTimer);
             this.hideTimer = setTimeout(() => {
@@ -180,6 +123,8 @@ class Video extends React.Component{
                     this._controlsWrapper.style.opacity = "0";
                     if( this.props.overlay && !this.props.fixedoverlay )
                         this._overlay.style.opacity = "0";
+                    if( this.props.autohidecursor )
+                        this._wrapper.style.cursor = "none";
                 }
 
             }, 3000 );
@@ -197,6 +142,8 @@ class Video extends React.Component{
     onPause = e => {
         this.setState({
             playing: false
+        }, () => {
+            this.triggerMouseMove();
         });
     }
 
@@ -207,164 +154,12 @@ class Video extends React.Component{
         });
     }
 
-    play = () => {
-        if( !this._video )
-            return;
-        this._video.play();
-    }
-
-    pause = () => {
-        if( !this._video )
-            return;
-        this._video.pause();
-    }
-
-    mute = () => {
-        if( !this._video )
-            return;
-        this.beforeMute = this.state.volume;
-        this.setState({
-            volume: 0
-        }, () => {
-            this.muted = true;
-            this._video.volume = 0;
-            this._muteButton.style.display = "none";
-            this._unmuteButton.style.display = "block";
-        })
-    }
-
-    unmute = () => {
-        if( !this._video )
-            return;
-        let volume = this.beforeMute || 1;
-        this.setState({
-            volume
-        }, () => {
-            this.muted = false;
-            this._video.volume = volume;
-            this._muteButton.style.display = "block";
-            this._unmuteButton.style.display = "none";
-        })
-    }
-
-    goFullscreen = element => {
-        if( element.requestFullscreen ){
-            return element.requestFullscreen();
-        }else if( element.msRequestFullscreen ){
-            return element.msRequestFullscreen();
-        }else if( element.mozRequestFullScreen ){
-            return element.mozRequestFullScreen();
-        }else if( element.webkitRequestFullscreen ){
-            return element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-        }
-    }
-
-    exitFullscreen = () => {
-        if( document.exitFullscreen ){
-            return document.exitFullscreen();
-        }else if( document.msExitFullscreen ){
-            return document.msExitFullscreen();
-        }else if( document.mozCancelFullScreen ){
-            return document.mozCancelFullScreen();
-        }else if( document.webkitExitFullscreen ){
-            return document.webkitExitFullscreen();
-        }
-    }
-
     onFullscreenSet = e => {
-        this.goFullscreen(this._wrapper);
-        this.setState({
-            fullscreen: true
-        });
+        this.videoActions.goFullscreen(this._wrapper);
     }
 
     onDefaultscreenSet = e => {
-        this.exitFullscreen();
-        this.setState({
-            fullscreen: false
-        });
-    }
-
-    toggleFullscreen = () => {
-        if( this.state.fullscreen ){
-            this.onDefaultscreenSet({});
-        }else{
-            this.onFullscreenSet({});
-        }
-    }
-
-    togglePlay = () => {
-        if( this.state.playing ){
-            this.pause();
-        }else{
-            this.play();
-        }
-    }
-
-    toggleMute = () => {
-        if( !this.muted ){
-            this.mute();
-        }else{
-            this.unmute();
-        }
-    }
-
-    back = () => {
-        if( !this._video )
-            return;
-        let currentTime = this._video.currentTime;
-        let end = this._video.duration;
-        if( currentTime -5 <= 0 ){
-            this._video.currentTime = 0;
-        }else{
-            this._video.currentTime = currentTime -5;
-        }
-        let progress = this._video.currentTime/end*100;
-        this.setState({
-            progress
-        }, () => {
-            this.onTimeUpdate({target: this._video});
-        });
-    }
-
-    forward = () => {
-        if( !this._video )
-            return;
-        let currentTime = this._video.currentTime;
-        let end = this._video.duration;
-        if( currentTime +5 >= end ){
-            this._video.currentTime = end;
-        }else{
-            this._video.currentTime = currentTime +5;
-        }
-        let progress = this._video.currentTime/end*100;
-        this.setState({
-            progress
-        }, () => {
-            this.onTimeUpdate({target: this._video});
-        });
-    }
-
-    volumeUp = () => {
-        if( this.state.volume >= 1 )
-            return;
-        let volume = this.state.volume +0.1;
-        this.setState({
-            volume
-        }, () => {
-            this._video.volume = volume;
-        });
-    }
-
-    volumeDown = () => {
-        if( this.state.volume <= 0 )
-            return;
-        let volume = this.state.volume -0.1;
-        this.setState({
-            volume
-        }, () => {
-            this._video.volume = volume;
-        });
+        this.videoActions.exitFullscreen();
     }
 
     onKeyDown = e => {
@@ -372,72 +167,35 @@ class Video extends React.Component{
             let keyCode = e.keyCode;
             switch( keyCode ){
                 case 32: { // Space
-                    this.togglePlay();
+                    this.videoActions.togglePlay();
                     break;
                 }
                 case 39: {
-                    this.forward(); // Right arrow
+                    this.videoActions.forward(); // Right arrow
                     break;
                 }
                 case 37: {
-                    this.back(); // Left arrow
+                    this.videoActions.back(); // Left arrow
                     break;
                 }
                 case 38: {
-                    this.volumeUp(); // Up arrow
+                    this.videoActions.volumeUp(); // Up arrow
                     break;
                 }
                 case 40: {
-                    this.volumeDown(); // Down arrow
+                    this.videoActions.volumeDown(); // Down arrow
                     break;
                 }
                 case 70: { // F
-                    this.toggleFullscreen();
+                    this.videoActions.toggleFullscreen();
                     break;
                 }
                 case 77: {
-                    this.toggleMute();
+                    this.videoActions.toggleMute();
                     break;
                 }
             }
         }
-    }
-
-    constructor(){
-        super();
-        this._controlsWrapper = {};
-        this._buffer = {};
-        this._progress = {};
-        this.state = {
-            buffer: 0,
-            progress: 0,
-            volume: 1,
-            fullscreen: false,
-            time: "00:00:00",
-            playing: false,
-            loaded: false,
-            isIE: false,
-            currentTime: 0
-        };
-        this.bufferCheckTimer = {};
-        this.fullscreenCheckTimer = {};
-    }
-
-    componentWillUnmount(){
-        let video = this.state.video;
-        if( video !== undefined ){
-            for( let i = 0; i < this.eventListeners.length; i++ ){
-                video.removeEventListener(this.eventListeners[i].event, this.eventListeners[i].listener);
-            }
-            this.eventListeners = [];
-            video.removeEventListener( "loadedmetadata", this.onMetaDataLoaded );
-            video.removeEventListener( "timeupdate", this.onTimeUpdate );
-            video.removeEventListener( "play", this.onPlay );
-            video.removeEventListener( "pause", this.onPause );
-            video.removeEventListener( "volumechange", this.onVolumeChange );
-        }
-        clearInterval( this.bufferCheckTimer );
-        clearInterval( this.fullscreenCheckTimer );
     }
 
     render(){
@@ -617,6 +375,7 @@ Video.propTypes = {
     controls: React.PropTypes.bool,
     // Autohide controls and overlay
     autohide: React.PropTypes.bool,
+    autohidecursor: React.PropTypes.bool,
     // Overlay enabled
     overlay: React.PropTypes.bool,
     // Overlay does not autohide
@@ -633,6 +392,7 @@ Video.defaultProps = {
     attributes: {},
     controls: true,
     autohide: true,
+    autohidecursor: true,
     overlay: true,
     fixedoverlay: false,
     width: "auto",

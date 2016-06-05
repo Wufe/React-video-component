@@ -68,7 +68,13 @@ Props:
             <td>autohide</td>
             <td>Bool</td>
             <td>true</td>
-            <td>Automatically hide controls and overlay ( if "fixedoverlay" set to false ).</td>
+            <td>Automatically hide controls and overlay ( if "fixedoverlay" set to false ) when playing.</td>
+        </tr>
+        <tr>
+            <td>autohidecursor</td>
+            <td>Bool</td>
+            <td>true</td>
+            <td>Automatically hide cursor when playing.</td>
         </tr>
         <tr>
             <td>overlay</td>

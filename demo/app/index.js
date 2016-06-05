@@ -29,7 +29,7 @@ class App extends React.Component{
     }
 
     onMetaDataLoaded = event => {
-        window.video = event.target;
+        this._video._wrapper.focus();
     }
 
     play = event => {
@@ -47,9 +47,10 @@ class App extends React.Component{
                     }}
                     loadedmetadata={this.onMetaDataLoaded}
                     timeupdate={this.onTimeUpdate}
+                    ref={ref => this._video = ref}
                     sources={[
                         {
-                            src: "https://wufe.me/sample2.mp4",
+                            src: "https://wufe.me/sample.mp4",
                             type: "video/mp4"
                         }
                     ]}
