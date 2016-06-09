@@ -3,19 +3,19 @@ export default class VideoActions{
         this.videoComponent = videoComponent;
     }
 
-    play(){
+    play = () => {
         if( !this.videoComponent._video )
             return;
         this.videoComponent._video.play();
     }
 
-    pause(){
+    pause = () => {
         if( !this.videoComponent._video )
             return;
         this.videoComponent._video.pause();
     }
 
-    mute(){
+    mute = () => {
         if( !this.videoComponent._video )
             return;
         this.beforeMute = this.videoComponent.state.volume;
@@ -29,7 +29,7 @@ export default class VideoActions{
         });
     }
 
-    unmute(){
+    unmute = () => {
         if( !this.videoComponent._video )
             return;
         let volume = this.beforeMute || 1;
@@ -43,7 +43,7 @@ export default class VideoActions{
         });
     }
 
-    volumeUp(){
+    volumeUp = () => {
         let volume = this.videoComponent.state.volume;
         if( volume >= 1 )
             return;
@@ -51,7 +51,7 @@ export default class VideoActions{
         this.setVolume(volume);
     }
 
-    volumeDown(){
+    volumeDown = () => {
         let volume = this.videoComponent.state.volume;
         if( volume <= 0 )
             return;
@@ -59,7 +59,7 @@ export default class VideoActions{
         this.setVolume(volume);
     }
 
-    setVolume(volume){
+    setVolume = (volume) => {
         this.videoComponent.setState({
             volume
         }, () => {
@@ -67,7 +67,7 @@ export default class VideoActions{
         });
     }
 
-    back(){
+    back = () => {
         if( !this.videoComponent._video )
             return;
         let {currentTime, duration} = this.videoComponent._video;
@@ -84,7 +84,7 @@ export default class VideoActions{
         });
     }
 
-    forward(){
+    forward = () => {
         if( !this.videoComponent._video )
             return;
         let {currentTime, duration} = this.videoComponent._video;
@@ -101,7 +101,7 @@ export default class VideoActions{
         });
     }
 
-    goFullscreen(element){
+    goFullscreen = (element) => {
         if( element.requestFullscreen ){
             return element.requestFullscreen();
         }else if( element.msRequestFullscreen ){
@@ -116,7 +116,7 @@ export default class VideoActions{
         });
     }
 
-    exitFullscreen(){
+    exitFullscreen = () => {
         if( document.exitFullscreen ){
             return document.exitFullscreen();
         }else if( document.msExitFullscreen ){

@@ -288,7 +288,7 @@ class Video extends React.Component{
                     <div
                         className="playButton"
                         ref={ref => this._play = ref}
-                        onClick={this.play}
+                        onClick={this.videoActions.play}
                         style={{
                             display: this.state.playing ? "none" : "block"
                         }}
@@ -298,7 +298,7 @@ class Video extends React.Component{
                     <div
                         className="pauseButton"
                         ref={ ref => this._pause = ref}
-                        onClick={this.pause}
+                        onClick={this.videoActions.pause}
                         style={{
                             display: this.state.playing ? "block" : "none"
                         }}
@@ -308,14 +308,14 @@ class Video extends React.Component{
                     <div
                         className="muteButton"
                         ref={ref => this._muteButton = ref}
-                        onClick={this.mute}
+                        onClick={this.videoActions.mute}
                     >
                         {icons.volume}
                     </div>
                     <div
                         className="unmuteButton"
                         ref={ref => this._unmuteButton = ref}
-                        onClick={this.unmute}
+                        onClick={this.videoActions.unmute}
                     >
                         {icons.mute}
                     </div>
