@@ -1,6 +1,7 @@
 var Webpack = require( 'webpack' );
 var Path = require( 'path' );
 var CopyWebpackPlugin = require( 'copy-webpack-plugin' );
+var externals = require( 'webpack-node-externals' );
 
 module.exports = {
     entry: {
@@ -36,5 +37,6 @@ module.exports = {
         new Webpack.optimize.DedupePlugin(),
         new Webpack.optimize.OccurenceOrderPlugin(),
         new Webpack.optimize.UglifyJsPlugin({ mangle: false, sourcemap: false })
-    ]
+    ],
+    externals: [ externals() ]
 };

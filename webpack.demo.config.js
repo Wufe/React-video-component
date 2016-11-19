@@ -1,6 +1,7 @@
 var Webpack = require( 'webpack' );
 var Path = require( 'path' );
 var CopyWebpackPlugin = require( 'copy-webpack-plugin' );
+var externals = require( 'webpack-node-externals' );
 
 module.exports = {
     devtool: "inline-sourcemap",
@@ -32,5 +33,6 @@ module.exports = {
     },
     plugins: [
 
-    ]
+    ],
+    externals: [ externals() ]
 };

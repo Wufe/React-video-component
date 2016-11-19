@@ -1,5 +1,6 @@
 var Webpack = require( 'webpack' );
 var Path = require( 'path' );
+var externals = require( 'webpack-node-externals' );
 
 module.exports = {
     devtool: "inline-sourcemap",
@@ -31,5 +32,6 @@ module.exports = {
                 loader: 'style!css!sass!'
             }
         ]
-    }
+    },
+    externals: [ externals() ]
 };
